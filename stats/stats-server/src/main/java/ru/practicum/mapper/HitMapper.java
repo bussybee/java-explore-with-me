@@ -16,7 +16,7 @@ public interface HitMapper {
     EndpointHit toEntity(EndpointHitDto hitDto);
 
     @Named("stringToDate")
-    static LocalDateTime convertStringToLocalDateTime(String date){
+    static LocalDateTime convertStringToLocalDateTime(String date) {
         return LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

@@ -7,6 +7,7 @@ import ru.practicum.repository.HitRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +18,14 @@ public class StatsService {
                                            List<String> uris, boolean unique) {
         List<ViewStatsDto> stats;
 
-        if (unique) {
-            stats = hitRepository.findAllUniqueHits(uris, start, end);
+        if (Optional.ofNullable(uris).isEmpty()) {
+            stats = hitRepository.findAllHits(start, end);
         } else {
-            stats = hitRepository.findAllHits(uris, start, end);
+            if (unique) {
+                stats = hitRepository.findAllUniqueHitsByUris(uris, start, end);
+            } else {
+                stats = hitRepository.findAllHitsByUris(uris, start, end);
+            }
         }
 
         return stats;

@@ -24,15 +24,16 @@ public class Client {
         restTemplate.postForObject(baseUrl + "/hit", hitDto, Void.class);
     }
 
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Map<String, Object> params = new HashMap<>();
         params.put("start", start.format(formatter));
         params.put("end", end.format(formatter));
-        params.put("uris", uris);
+        params.put("uris", String.join(",", uris));
         params.put("unique", unique);
 
-        ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(baseUrl + "/stats", ViewStatsDto[].class, params);
+        ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(baseUrl +
+                "/stats?start={start}&end={end}&uris={uris}&unique={unique}", ViewStatsDto[].class, params);
 
         return Arrays.stream(response.getBody()).toList();
     }

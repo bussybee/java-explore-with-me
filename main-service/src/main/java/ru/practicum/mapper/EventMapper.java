@@ -24,6 +24,7 @@ public interface EventMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "eventDate", source = "dto.eventDate", qualifiedByName = "stringToDate")
+    @Mapping(target = "category", ignore = true)
     void updateEventFromDto(UpdateEventUserRequest dto, @MappingTarget Event event);
 
     @Named("stringToDate")

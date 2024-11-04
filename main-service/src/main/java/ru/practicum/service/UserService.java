@@ -89,14 +89,14 @@ public class UserService {
                     "или события в состоянии ожидания модерации");
         }
 
+        eventMapper.updateEventFromDto(eventDto, event);
+
         Optional.ofNullable(eventDto.getCategory()).ifPresent(catId -> event.setCategory(categoryRepository
                 .findById(catId).orElseThrow()));
 
         if (Optional.ofNullable(eventDto.getLocation()).isPresent()) {
             locationService.save(event);
         }
-
-        eventMapper.updateEventFromDto(eventDto, event);
 
         if (eventDto.getStateAction() != null) {
             switch (eventDto.getStateAction()) {

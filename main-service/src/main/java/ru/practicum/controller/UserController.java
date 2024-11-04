@@ -29,7 +29,7 @@ public class UserController {
     @PatchMapping("/{userId}/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public FullEventDto updateEvent(@PathVariable Long userId, @PathVariable Long eventId,
-                                    @RequestBody UpdateEventUserRequest eventDto) {
+                                    @RequestBody @Valid UpdateEventUserRequest eventDto) {
         return userService.updateEvent(userId, eventId, eventDto);
     }
 

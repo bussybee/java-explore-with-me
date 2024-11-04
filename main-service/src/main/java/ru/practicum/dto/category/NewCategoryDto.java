@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.util.validation.UniqueCategoryName;
 
 @Getter
 @Setter
@@ -14,5 +15,6 @@ import lombok.Setter;
 public class NewCategoryDto {
     @Size(min = 1, max = 50)
     @NotBlank
+    @UniqueCategoryName
     private String name;
 }

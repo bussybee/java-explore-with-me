@@ -23,6 +23,7 @@ public interface EventMapper {
     void updateEventFromDto(UpdateEventAdminRequest dto, @MappingTarget Event event);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "eventDate", source = "dto.eventDate", qualifiedByName = "stringToDate")
     void updateEventFromDto(UpdateEventUserRequest dto, @MappingTarget Event event);
 
     @Named("stringToDate")

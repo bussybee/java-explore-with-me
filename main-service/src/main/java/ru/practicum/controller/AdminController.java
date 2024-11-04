@@ -80,7 +80,7 @@ public class AdminController {
 
     @PostMapping("/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCompilation(@RequestBody NewCompilationDto compilationDto) {
+    public CompilationDto createCompilation(@RequestBody @Valid NewCompilationDto compilationDto) {
         return adminService.createCompilation(compilationDto);
     }
 

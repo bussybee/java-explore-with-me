@@ -18,11 +18,10 @@ import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.Event;
-import ru.practicum.model.Location;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
+import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.LocationRepository;
 import ru.practicum.repository.RequestRepository;
 import ru.practicum.util.RequestStatus;
 import ru.practicum.util.State;
@@ -46,11 +45,12 @@ public class UserService {
     PublicService publicService;
 
     CategoryMapper categoryMapper;
+    CategoryRepository categoryRepository;
 
     RequestRepository requestRepository;
     RequestMapper requestMapper;
 
-    LocationRepository locationRepository;
+    LocationService locationService;
 
     public FullEventDto createEvent(Long userId, NewEventDto eventDto) {
         User initiator = adminService.getUserById(userId);
@@ -71,12 +71,8 @@ public class UserService {
         event.setCreatedOn(LocalDateTime.now());
         event.setState(State.PENDING);
 
-        Optional<Location> location = Optional.ofNullable(locationRepository.findByLatAndLon(
-                event.getLocation().getLat(), event.getLocation().getLon()));
-        if (location.isPresent()) {
-            event.setLocation(location.get());
-        } else {
-            locationRepository.save(event.getLocation());
+        if (Optional.ofNullable(eventDto.getLocation()).isPresent()) {
+            locationService.save(event);
         }
 
         Event createdEvent = eventRepository.save(event);
@@ -88,24 +84,32 @@ public class UserService {
 
     public FullEventDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest eventDto) {
         Event event = getEventById(userId, eventId);
+        if (event.getState().equals(State.PUBLISHED)) {
+            throw new IllegalArgumentException("Иизменить можно только отмененные события " +
+                    "или события в состоянии ожидания модерации");
+        }
+
+        Optional.ofNullable(eventDto.getCategory()).ifPresent(catId -> event.setCategory(categoryRepository
+                .findById(catId).orElseThrow()));
+
+        if (Optional.ofNullable(eventDto.getLocation()).isPresent()) {
+            locationService.save(event);
+        }
+
+        eventMapper.updateEventFromDto(eventDto, event);
 
         if (eventDto.getStateAction() != null) {
             switch (eventDto.getStateAction()) {
                 case SEND_TO_REVIEW:
-                    if (!(event.getState().equals(State.PENDING))) {
-                        throw new IllegalArgumentException("Изменить можно только события в состоянии ожидания модерации");
-                    }
-                    eventMapper.updateEventFromDto(eventDto, event);
+                    event.setState(State.PENDING);
                     break;
                 case CANCEL_REVIEW:
-                    if (!(event.getState().equals(State.CANCELED))) {
-                        throw new IllegalArgumentException("Изменить можно только отмененные события");
-                    }
                     event.setState(State.CANCELED);
                     break;
             }
         }
 
+        eventRepository.save(event);
         return eventMapper.toDto(event);
     }
 
@@ -151,6 +155,7 @@ public class UserService {
 
         if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
             request.setStatus(RequestStatus.CONFIRMED);
+            event.incrementConfirmedRequests();
         } else {
             request.setStatus(RequestStatus.PENDING);
         }

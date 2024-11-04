@@ -40,7 +40,7 @@ public class PublicController {
 
     @GetMapping("/compilations")
     @ResponseStatus(HttpStatus.OK)
-    public List<CompilationDto> getCompilations(@RequestParam boolean pinned,
+    public List<CompilationDto> getCompilations(@RequestParam(defaultValue = "false") boolean pinned,
                                                 @RequestParam(defaultValue = "0") int from,
                                                 @RequestParam(defaultValue = "10") int size) {
         return publicService.getCompilations(pinned, from, size);

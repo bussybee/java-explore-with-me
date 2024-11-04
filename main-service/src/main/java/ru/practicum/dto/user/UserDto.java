@@ -18,5 +18,6 @@ public class UserDto {
     String name;
     @Email
     @NotBlank
+    @Size(min = 6, max = 254)
     String email;
 }

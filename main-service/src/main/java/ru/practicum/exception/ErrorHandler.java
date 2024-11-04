@@ -1,5 +1,6 @@
 package ru.practicum.exception;
 
+import io.micrometer.core.instrument.config.validate.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.sql.SQLException;
 
 @RestControllerAdvice
 @Slf4j
@@ -44,5 +47,19 @@ public class ErrorHandler extends RuntimeException {
     public ErrorResponse handleBadRequestException(MissingServletRequestParameterException e) {
         log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
         return new ErrorResponse("Отсутствует обязательный параметр");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleValidationException(ValidationException e) {
+        log.debug("Получен статус 409 Conflict {}", e.getMessage(), e);
+        return new ErrorResponse("Некорректно составлен запрос");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleSQLException(SQLException e) {
+        log.debug("Получен статус 409 Conflict {}", e.getMessage(), e);
+        return new ErrorResponse("Некорректные данные");
     }
 }

@@ -155,7 +155,7 @@ public class AdminService {
     public CompilationDto createCompilation(NewCompilationDto compilationDto) {
         Compilation compilation = new Compilation();
         Optional.ofNullable(compilationDto.getTitle()).ifPresent(compilation::setTitle);
-        compilation.setPinned(compilation.isPinned());
+        Optional.ofNullable(compilationDto.getPinned()).ifPresent(compilation::setPinned);
         Optional.ofNullable(compilationDto.getEvents())
                 .ifPresent(events -> compilation.setEvents(events.stream()
                         .map(eventShortDto -> eventRepository.findById(eventShortDto.getId())

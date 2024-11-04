@@ -4,8 +4,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.model.Location;
 import ru.practicum.util.UserStateAction;
 
@@ -22,8 +20,7 @@ public class UpdateEventUserRequest {
     @Size(min = 20, max = 7000)
     String description;
     Location location;
-    CategoryDto category;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    Long category;
     String eventDate;
     boolean paid;
     @PositiveOrZero

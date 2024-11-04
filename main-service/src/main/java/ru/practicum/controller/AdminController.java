@@ -44,7 +44,7 @@ public class AdminController {
 
     @PostMapping("/categories")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto createCategory(@RequestBody NewCategoryDto categoryDto) {
+    public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto categoryDto) {
         return adminService.createCategory(categoryDto);
     }
 
@@ -62,7 +62,7 @@ public class AdminController {
 
     @PatchMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public FullEventDto editEvent(@PathVariable Long eventId, @RequestBody UpdateEventAdminRequest eventDto) {
+    public FullEventDto editEvent(@PathVariable Long eventId, @RequestBody @Valid UpdateEventAdminRequest eventDto) {
         return adminService.editEvent(eventId, eventDto);
     }
 
@@ -79,7 +79,7 @@ public class AdminController {
     }
 
     @PostMapping("/compilations")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto createCompilation(@RequestBody NewCompilationDto compilationDto) {
         return adminService.createCompilation(compilationDto);
     }

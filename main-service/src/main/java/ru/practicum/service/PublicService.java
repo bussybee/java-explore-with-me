@@ -66,7 +66,7 @@ public class PublicService {
     public FullEventDto getEventById(Long id, String uri, String ip) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException("Событие не найдено"));
         if (!event.getState().equals(State.PUBLISHED)) {
-            throw new IllegalArgumentException("Событие не опубликовано");
+            throw new NotFoundException("Событие не опубликовано");
         }
 
         statsManager.sendEventHit(uri, ip);

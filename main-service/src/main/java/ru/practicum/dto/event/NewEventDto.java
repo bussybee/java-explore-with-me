@@ -1,6 +1,8 @@
 package ru.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,8 +17,10 @@ public class NewEventDto {
     @Size(min = 3, max = 120)
     String title;
     @Size(min = 20, max = 2000)
+    @NotBlank
     String annotation;
     @Size(min = 20, max = 7000)
+    @NotBlank
     String description;
     Location location;
     Long categoryId;
@@ -24,5 +28,6 @@ public class NewEventDto {
     String eventDate;
     boolean paid;
     boolean requestModeration;
+    @PositiveOrZero
     int participantLimit;
 }

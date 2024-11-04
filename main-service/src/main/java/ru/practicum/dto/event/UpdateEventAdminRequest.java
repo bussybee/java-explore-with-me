@@ -21,8 +21,8 @@ public class UpdateEventAdminRequest {
     Location location;
     Long categoryId;
     String eventDate;
-    boolean paid;
-    int participantLimit;
-    boolean requestModeration;
+    boolean paid = false;
+    int participantLimit = 0;
+    boolean requestModeration = true;
     AdminStateAction stateAction;
 }

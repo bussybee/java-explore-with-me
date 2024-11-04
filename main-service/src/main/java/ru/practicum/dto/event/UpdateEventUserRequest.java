@@ -1,5 +1,6 @@
 package ru.practicum.dto.event;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +26,7 @@ public class UpdateEventUserRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     String eventDate;
     boolean paid;
+    @PositiveOrZero
     int participantLimit;
     boolean requestModeration;
     UserStateAction stateAction;

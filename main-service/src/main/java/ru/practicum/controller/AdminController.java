@@ -31,8 +31,8 @@ public class AdminController {
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     public List<UserDto> getUsers(@RequestParam(required = false) List<Integer> ids,
-                                     @RequestParam(defaultValue = "0") int from,
-                                     @RequestParam(defaultValue = "10") int size) {
+                                  @RequestParam(defaultValue = "0") int from,
+                                  @RequestParam(defaultValue = "10") int size) {
         return adminService.getUsers(ids, from, size);
     }
 
@@ -56,7 +56,7 @@ public class AdminController {
 
     @PatchMapping("/categories/{catId}")
     @ResponseStatus(HttpStatus.OK)
-    public CategoryDto editCategory(@PathVariable Long catId, @RequestBody CategoryDto categoryDto) {
+    public CategoryDto editCategory(@PathVariable Long catId, @RequestBody @Valid CategoryDto categoryDto) {
         return adminService.editCategory(catId, categoryDto);
     }
 
@@ -69,12 +69,12 @@ public class AdminController {
     @GetMapping("/events")
     @ResponseStatus(HttpStatus.OK)
     public List<FullEventDto> getEvents(@RequestParam(required = false) List<Integer> users,
-                                  @RequestParam(required = false) List<String> states,
-                                  @RequestParam(required = false) List<Integer> categories,
-                                  @RequestParam(required = false) String rangeStart,
-                                  @RequestParam(required = false) String rangeEnd,
-                                  @RequestParam(defaultValue = "0") int from,
-                                  @RequestParam(defaultValue = "10") int size) {
+                                        @RequestParam(required = false) List<String> states,
+                                        @RequestParam(required = false) List<Integer> categories,
+                                        @RequestParam(required = false) String rangeStart,
+                                        @RequestParam(required = false) String rangeEnd,
+                                        @RequestParam(defaultValue = "0") int from,
+                                        @RequestParam(defaultValue = "10") int size) {
         return adminService.getEvents(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
@@ -92,7 +92,8 @@ public class AdminController {
 
     @PatchMapping("/compilations/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CompilationDto editCompilation(@PathVariable Long id, @RequestBody UpdateCompilationRequest compilationDto) {
+    public CompilationDto editCompilation(@PathVariable Long id,
+                                          @RequestBody @Valid UpdateCompilationRequest compilationDto) {
         return adminService.editCompilation(id, compilationDto);
     }
 }

@@ -62,4 +62,12 @@ public class ErrorHandler extends RuntimeException {
         log.debug("Получен статус 409 Conflict {}", e.getMessage(), e);
         return new ErrorResponse("Некорректные данные");
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIncorrectDataException(IncorrectDataException e) {
+        log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
+        return new ErrorResponse("Некорректная дата");
+    }
+
 }

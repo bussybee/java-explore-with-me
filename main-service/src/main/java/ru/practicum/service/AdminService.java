@@ -15,6 +15,7 @@ import ru.practicum.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.dto.event.FullEventDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.IncorrectDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.CompilationMapper;
@@ -91,9 +92,16 @@ public class AdminService {
 
     public FullEventDto editEvent(Long eventId, UpdateEventAdminRequest eventDto) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено"));
+        Optional.ofNullable(eventDto.getEventDate()).ifPresent(date -> {
+            if (parse(date).isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new IncorrectDataException("Дата начала изменяемого события " +
+                        "должна быть не ранее чем за час от даты публикации");
+            }
+        });
+
         eventMapper.updateEventFromDto(eventDto, event);
 
-        Optional.ofNullable(eventDto.getCategoryId()).ifPresent(catId -> event.setCategory(categoryRepository
+        Optional.ofNullable(eventDto.getCategory()).ifPresent(catId -> event.setCategory(categoryRepository
                 .findById(catId).orElseThrow()));
 
         if (Optional.ofNullable(eventDto.getLocation()).isPresent()) {
@@ -107,12 +115,6 @@ public class AdminService {
                         throw new IllegalArgumentException("Событие можно публиковать только если оно " +
                                 "в состоянии ожидания публикации");
                     }
-                    Optional.ofNullable(eventDto.getEventDate()).ifPresent(date -> {
-                        if (parse(date).isBefore(LocalDateTime.now().plusHours(1))) {
-                            throw new IllegalArgumentException("Дата начала изменяемого события " +
-                                    "должна быть не ранее чем за час от даты публикации");
-                        }
-                    });
                     event.setState(State.PUBLISHED);
                     event.setPublishedOn(LocalDateTime.now());
                     break;

@@ -13,6 +13,7 @@ import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.exception.IncorrectDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.EventMapper;
@@ -56,13 +57,13 @@ public class UserService {
         User initiator = adminService.getUserById(userId);
 
         if (parse(eventDto.getEventDate()).isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new IllegalArgumentException("Дата и время на которые намечено событие не может быть раньше, " +
+            throw new IncorrectDataException("Дата и время на которые намечено событие не может быть раньше, " +
                     "чем через два часа от текущего момента");
         }
 
         Event event = eventMapper.newEventToEntity(eventDto);
 
-        Optional.ofNullable(eventDto.getCategoryId()).ifPresent(catId -> {
+        Optional.ofNullable(eventDto.getCategory()).ifPresent(catId -> {
             CategoryDto category = publicService.getCategoryById(catId);
             event.setCategory(categoryMapper.toEntity(category));
         });
@@ -88,6 +89,12 @@ public class UserService {
             throw new IllegalArgumentException("Иизменить можно только отмененные события " +
                     "или события в состоянии ожидания модерации");
         }
+        Optional.ofNullable(eventDto.getEventDate()).ifPresent(date -> {
+            if (parse(date).isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new IncorrectDataException("Дата начала изменяемого события " +
+                        "должна быть не ранее чем за час от даты публикации");
+            }
+        });
 
         eventMapper.updateEventFromDto(eventDto, event);
 

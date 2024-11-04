@@ -23,11 +23,11 @@ public class NewEventDto {
     @NotBlank
     String description;
     Location location;
-    Long categoryId;
+    Long category;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     String eventDate;
-    boolean paid;
-    boolean requestModeration;
+    boolean paid = false;
+    boolean requestModeration = true;
     @PositiveOrZero
-    int participantLimit;
+    int participantLimit = 0;
 }

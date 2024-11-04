@@ -19,7 +19,7 @@ public class UpdateEventAdminRequest {
     @Size(min = 20, max = 7000)
     String description;
     Location location;
-    Long categoryId;
+    Long category;
     String eventDate;
     boolean paid = false;
     int participantLimit = 0;

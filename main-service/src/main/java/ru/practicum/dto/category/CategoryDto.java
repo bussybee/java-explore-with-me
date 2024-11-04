@@ -13,7 +13,7 @@ import ru.practicum.util.validation.UniqueCategoryName;
 @NoArgsConstructor
 public class CategoryDto {
     private Long id;
-    @UniqueCategoryName
     @Size(min = 1, max = 50)
+    @UniqueCategoryName
     private String name;
 }

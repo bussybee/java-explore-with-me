@@ -16,10 +16,12 @@ public interface EventMapper {
     FullEventDto toDto(Event event);
 
     @Mapping(target = "eventDate", source = "eventDto.eventDate", qualifiedByName = "stringToDate")
+    @Mapping(target = "category", ignore = true)
     Event newEventToEntity(NewEventDto eventDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "eventDate", source = "dto.eventDate", qualifiedByName = "stringToDate")
+    @Mapping(target = "category", ignore = true)
     void updateEventFromDto(UpdateEventAdminRequest dto, @MappingTarget Event event);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

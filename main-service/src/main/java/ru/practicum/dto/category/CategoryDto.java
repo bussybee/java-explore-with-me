@@ -14,6 +14,5 @@ import ru.practicum.util.validation.UniqueCategoryName;
 public class CategoryDto {
     private Long id;
     @Size(min = 1, max = 50)
-    @UniqueCategoryName
     private String name;
 }

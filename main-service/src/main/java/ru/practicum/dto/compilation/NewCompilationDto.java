@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.dto.event.EventShortDto;
 
 import java.util.List;
 
@@ -18,5 +17,5 @@ public class NewCompilationDto {
     @Size(min = 1, max = 50)
     String title;
     Boolean pinned;
-    List<EventShortDto> events;
+    List<Long> events;
 }

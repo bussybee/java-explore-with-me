@@ -50,7 +50,7 @@ public class UserController {
     @PatchMapping("/{userId}/events/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public EventRequestStatusUpdateResult editRequestStatus(@PathVariable Long userId, @PathVariable Long eventId,
-                                                            @RequestBody EventRequestStatusUpdateRequest eventRequest) {
+                                                            @RequestBody @Valid EventRequestStatusUpdateRequest eventRequest) {
         return userService.editRequestStatus(userId, eventId, eventRequest);
     }
 

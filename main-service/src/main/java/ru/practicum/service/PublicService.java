@@ -108,8 +108,13 @@ public class PublicService {
         Optional.ofNullable(onlyAvailable)
                 .ifPresent(av -> predicate.and(event.confirmedRequests.lt(event.participantLimit)));
 
-        Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size,
-                Sort.by(sort.equalsIgnoreCase("VIEWS") ? "views" : "eventDate"));
+        Pageable pageable;
+        if (sort == null) {
+            pageable = PageRequest.of(from > 0 ? from / size : 0, size);
+        } else {
+            pageable = PageRequest.of(from > 0 ? from / size : 0, size,
+                    Sort.by(sort.equalsIgnoreCase("VIEWS") ? "views" : "eventDate"));
+        }
 
         List<Event> events = eventRepository.findAll(predicate, pageable).toList();
         events.forEach(e -> e.setViews(statsManager.getEventHits(e)));

@@ -187,10 +187,11 @@ public class UserService {
                                                             EventRequestStatusUpdateRequest eventRequest) {
         Event event = getEventById(userId, eventId);
 
-        List<Request> requests = requestRepository.findAllById(eventRequest.getRequestsIds());
+        List<Request> requests = requestRepository.findAllById(eventRequest.getRequestIds());
         EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
         List<Request> confRequests = new ArrayList<>();
         List<Request> rejectRequests = new ArrayList<>();
+        RequestStatus status = RequestStatus.valueOf(eventRequest.getStatus());
 
         for (Request request : requests) {
             if (!request.getStatus().equals(RequestStatus.PENDING)) {
@@ -208,11 +209,11 @@ public class UserService {
                 break;
             }
 
-            if (eventRequest.getRequestStatus().equals(RequestStatus.CONFIRMED)) {
+            if (status.equals(RequestStatus.CONFIRMED)) {
                 request.setStatus(RequestStatus.CONFIRMED);
                 event.incrementConfirmedRequests();
                 confRequests.add(request);
-            } else if (eventRequest.getRequestStatus().equals(RequestStatus.REJECTED)) {
+            } else if (status.equals(RequestStatus.REJECTED)) {
                 request.setStatus(RequestStatus.REJECTED);
                 rejectRequests.add(request);
             }

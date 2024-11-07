@@ -160,8 +160,7 @@ public class AdminService {
         Optional.ofNullable(compilationDto.getPinned()).ifPresent(compilation::setPinned);
         Optional.ofNullable(compilationDto.getEvents())
                 .ifPresent(events -> compilation.setEvents(events.stream()
-                        .map(eventShortDto -> eventRepository.findById(eventShortDto.getId())
-                                .orElseThrow(() -> new NotFoundException("Событие с" + eventShortDto.getId() + "не найдено")))
+                        .map(eventId -> eventRepository.findById(eventId).orElseThrow())
                         .toList()));
 
         return compilationMapper.toDto(compilationRepository.save(compilation));
@@ -175,6 +174,9 @@ public class AdminService {
         Compilation compilation = compilationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Подборка не найдена"));
         compilationMapper.updateCompFromDto(compilationDto, compilation);
+        Optional.ofNullable(compilationDto.getEvents())
+                .ifPresent(events -> compilation.setEvents(eventRepository.findAllById(events)));
+        compilationRepository.save(compilation);
         return compilationMapper.toDto(compilation);
     }
 }

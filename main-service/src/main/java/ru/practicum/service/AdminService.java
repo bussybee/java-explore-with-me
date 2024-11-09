@@ -149,9 +149,11 @@ public class AdminService {
     }
 
 
-    public CategoryDto editCategory(Long catId, CategoryDto categoryDto) {
-        categoryRepository.findById(catId).orElseThrow(() -> new NotFoundException("Категория не найдена"));
-        return categoryMapper.toDto(categoryRepository.save(categoryMapper.toEntity(categoryDto)));
+    public CategoryDto editCategory(Long catId, NewCategoryDto categoryDto) {
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException("Категория не найдена"));
+        category.setName(categoryDto.getName());
+        return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     public CompilationDto createCompilation(NewCompilationDto compilationDto) {

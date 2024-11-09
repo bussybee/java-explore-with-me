@@ -160,7 +160,7 @@ public class UserService {
                 .created(LocalDateTime.now())
                 .build();
 
-        if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
+        if (!event.isRequestModeration()) {
             request.setStatus(RequestStatus.CONFIRMED);
             event.incrementConfirmedRequests();
         } else {
@@ -177,9 +177,9 @@ public class UserService {
 
 
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        Request request = requestRepository.findByRequesterIdAndEventId(userId, requestId)
+        Request request = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден"));
-        request.setStatus(RequestStatus.CANCELLED);
+        request.setStatus(RequestStatus.CANCELED);
         return requestMapper.toDto(requestRepository.save(request));
     }
 
@@ -199,8 +199,8 @@ public class UserService {
                         "находящихся в состоянии ожидания");
             }
 
-            if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
-                request.setStatus(RequestStatus.CANCELLED);
+            if (event.getConfirmedRequests() >= event.getParticipantLimit() && event.getParticipantLimit() != 0) {
+                request.setStatus(RequestStatus.CANCELED);
                 throw new IllegalArgumentException("У события достигнут лимит запросов на участие");
             }
 

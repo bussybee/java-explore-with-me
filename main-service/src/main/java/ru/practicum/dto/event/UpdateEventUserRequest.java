@@ -22,9 +22,9 @@ public class UpdateEventUserRequest {
     Location location;
     Long category;
     String eventDate;
-    boolean paid;
+    Boolean paid;
     @PositiveOrZero
-    int participantLimit;
-    boolean requestModeration;
+    Integer participantLimit;
+    Boolean requestModeration;
     UserStateAction stateAction;
 }

@@ -146,7 +146,7 @@ public class UserService {
             throw new IllegalArgumentException("Нельзя участвовать в неопубликованном событии");
         }
 
-        if (event.getConfirmedRequests() >= event.getParticipantLimit() && event.getParticipantLimit() != 0) {
+        if (event.getConfirmedRequests() == event.getParticipantLimit() && event.getParticipantLimit() != 0) {
             throw new IllegalArgumentException("У события достигнут лимит запросов на участие");
         }
 
@@ -161,6 +161,9 @@ public class UserService {
                 .build();
 
         if (!event.isRequestModeration()) {
+            request.setStatus(RequestStatus.CONFIRMED);
+            event.incrementConfirmedRequests();
+        } else if (event.getParticipantLimit() == 0) {
             request.setStatus(RequestStatus.CONFIRMED);
             event.incrementConfirmedRequests();
         } else {
@@ -199,7 +202,7 @@ public class UserService {
                         "находящихся в состоянии ожидания");
             }
 
-            if (event.getConfirmedRequests() >= event.getParticipantLimit() && event.getParticipantLimit() != 0) {
+            if (event.getConfirmedRequests() == event.getParticipantLimit() && event.getParticipantLimit() != 0) {
                 request.setStatus(RequestStatus.CANCELED);
                 throw new IllegalArgumentException("У события достигнут лимит запросов на участие");
             }

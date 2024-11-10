@@ -1,5 +1,6 @@
 package ru.practicum.service;
 
+import com.querydsl.core.BooleanBuilder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,14 +22,12 @@ import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.UserMapper;
-import ru.practicum.model.Category;
-import ru.practicum.model.Compilation;
-import ru.practicum.model.Event;
-import ru.practicum.model.User;
+import ru.practicum.model.*;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.CompilationRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.UserRepository;
+import ru.practicum.util.LocalDateTimeFormatter;
 import ru.practicum.util.State;
 
 import java.time.LocalDateTime;
@@ -77,7 +76,8 @@ public class AdminService {
     }
 
     public void deleteById(Long id) {
-        userRepository.delete(getUserById(id));
+        getUserById(id);
+        userRepository.deleteById(id);
     }
 
     public User getUserById(Long id) {
@@ -133,12 +133,35 @@ public class AdminService {
         return eventMapper.toDto(event);
     }
 
-    public List<FullEventDto> getEvents(List<Integer> users, List<String> states, List<Integer> categories,
+    public List<FullEventDto> getEvents(List<Long> users, List<String> states, List<Long> categories,
                                         String rangeStart, String rangeEnd, int from, int size) {
+        QEvent event = QEvent.event;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        Optional.ofNullable(users)
+                .map(event.initiator.id::in)
+                .ifPresent(predicate::and);
+
+        Optional.ofNullable(states)
+                .map(s -> s.stream().map(State::valueOf).toList())
+                .map(event.state::in)
+                .ifPresent(predicate::and);
+
+        Optional.ofNullable(categories)
+                .map(event.category.id::in)
+                .ifPresent(predicate::and);
+
+        Optional.ofNullable(rangeStart)
+                .map(LocalDateTimeFormatter::parse)
+                .ifPresent(start -> predicate.and(event.eventDate.after(start)));
+
+        Optional.ofNullable(rangeEnd)
+                .map(LocalDateTimeFormatter::parse)
+                .ifPresent(end -> predicate.and(event.eventDate.before(end)));
+
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
 
-        return eventRepository.findAllByParams(users, states, categories, parse(rangeStart),
-                parse(rangeEnd), pageable).stream().map(eventMapper::toDto).toList();
+        return eventRepository.findAll(predicate, pageable).stream().map(eventMapper::toDto).toList();
     }
 
     public void deleteCategory(Long catId) {

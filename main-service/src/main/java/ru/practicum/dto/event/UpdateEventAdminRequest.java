@@ -20,9 +20,10 @@ public class UpdateEventAdminRequest {
     String description;
     Location location;
     Long category;
+    //todo jsonformat
     String eventDate;
-    boolean paid = false;
-    int participantLimit = 0;
-    boolean requestModeration = true;
+    Boolean paid;
+    Integer participantLimit;
+    Boolean requestModeration;
     AdminStateAction stateAction;
 }

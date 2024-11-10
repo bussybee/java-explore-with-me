@@ -23,10 +23,10 @@ public class FullEventDto {
     String eventDate;
     String createdOn;
     String publishedOn;
-    int participantLimit;
-    int confirmedRequests;
-    int views;
-    boolean paid;
-    boolean requestModeration;
+    Integer participantLimit;
+    Integer confirmedRequests;
+    Integer views;
+    Boolean paid;
+    Boolean requestModeration;
     State state;
 }

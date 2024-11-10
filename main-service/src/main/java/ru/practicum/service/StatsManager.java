@@ -31,6 +31,6 @@ public class StatsManager {
         String eventUri = "/events/" + event.getId();
         List<ViewStatsDto> stats = client.getStats(event.getPublishedOn(), LocalDateTime.now(),
                 List.of(eventUri), true);
-        return stats.getFirst().getHits().intValue();
+        return !stats.isEmpty() ? stats.getFirst().getHits().intValue() : 0;
     }
 }

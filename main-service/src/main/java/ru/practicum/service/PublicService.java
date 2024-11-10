@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.event.FullEventDto;
+import ru.practicum.exception.IncorrectDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.CompilationMapper;
@@ -20,13 +21,12 @@ import ru.practicum.model.QEvent;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.CompilationRepository;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.util.LocalDateTimeFormatter;
 import ru.practicum.util.State;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static ru.practicum.util.LocalDateTimeFormatter.FORMATTER;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -88,21 +88,24 @@ public class PublicService {
                 .ifPresent(predicate::and);
 
         Optional.ofNullable(categories)
-                .filter(cat -> !cat.isEmpty())
-                .ifPresent(cat -> predicate.and(event.category.id.in(cat)));
+                .map(event.category.id::in)
+                .ifPresent(predicate::and);
 
-        Optional.ofNullable(paid).ifPresent(p -> predicate.and(event.paid.eq(p)));
-
-        Optional.ofNullable(rangeStart)
-                .map(start -> LocalDateTime.parse(start, FORMATTER))
-                .ifPresent(start -> predicate.and(event.eventDate.after(start)));
-
-        Optional.ofNullable(rangeEnd)
-                .map(end -> LocalDateTime.parse(end, FORMATTER))
-                .ifPresent(end -> predicate.and(event.eventDate.before(end)));
+        Optional.ofNullable(paid)
+                .map(event.paid::eq)
+                .ifPresent(predicate::and);
 
         if (rangeEnd == null && rangeStart == null) {
             predicate.and(event.eventDate.after(LocalDateTime.now()));
+        } else {
+            LocalDateTime start = LocalDateTimeFormatter.parse(rangeStart);
+            LocalDateTime end = LocalDateTimeFormatter.parse(rangeEnd);
+            if (start.isBefore(end)) {
+                predicate.and(event.eventDate.after(start));
+                predicate.and(event.eventDate.before(end));
+            } else {
+                throw new IncorrectDataException("Неправильно введенный диапазон дат");
+            }
         }
 
         Optional.ofNullable(onlyAvailable)

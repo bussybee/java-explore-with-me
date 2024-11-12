@@ -109,7 +109,8 @@ public class PublicService {
         }
 
         Optional.ofNullable(onlyAvailable)
-                .ifPresent(av -> predicate.and(event.confirmedRequests.lt(event.participantLimit)));
+                .ifPresent(av -> predicate.and(event.participantLimit.eq(0)
+                        .or(event.confirmedRequests.lt(event.participantLimit))));
 
         Pageable pageable;
         if (sort == null) {

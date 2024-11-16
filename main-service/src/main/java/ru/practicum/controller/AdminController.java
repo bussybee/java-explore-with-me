@@ -96,4 +96,10 @@ public class AdminController {
                                           @RequestBody @Valid UpdateCompilationRequest compilationDto) {
         return adminService.editCompilation(id, compilationDto);
     }
+
+    @DeleteMapping("/comments/{comId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable Long comId) {
+        adminService.deleteComment(comId);
+    }
 }

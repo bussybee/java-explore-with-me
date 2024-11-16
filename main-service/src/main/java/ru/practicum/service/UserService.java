@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.category.CategoryDto;
+import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.dto.event.FullEventDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
@@ -16,12 +18,15 @@ import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.exception.IncorrectDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
+import ru.practicum.mapper.CommentMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.RequestMapper;
+import ru.practicum.model.Comment;
 import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 import ru.practicum.repository.CategoryRepository;
+import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
 import ru.practicum.util.RequestStatus;
@@ -52,6 +57,9 @@ public class UserService {
     RequestMapper requestMapper;
 
     LocationService locationService;
+
+    CommentMapper commentMapper;
+    CommentRepository commentRepository;
 
     public FullEventDto createEvent(Long userId, NewEventDto eventDto) {
         User initiator = adminService.getUserById(userId);
@@ -233,5 +241,44 @@ public class UserService {
 
     public List<ParticipationRequestDto> getRequestsByEvent(Long userId, Long eventId) {
         return requestRepository.findAllByEvent(userId, eventId).stream().map(requestMapper::toDto).toList();
+    }
+
+    public CommentDto createComment(Long userId, Long eventId, NewCommentDto commentDto) {
+        User author = adminService.getUserById(userId);
+        eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено"));
+
+        Comment comment = Comment.builder()
+                .content(commentDto.getContent())
+                .author(author)
+                .eventId(eventId)
+                .created(LocalDateTime.now())
+                .isEdited(false)
+                .build();
+
+        Comment savedComment = commentRepository.save(comment);
+        log.info("Comment created {}", comment);
+
+        return commentMapper.toDto(savedComment);
+    }
+
+    public CommentDto updateComment(Long userId, Long eventId, Long comId, NewCommentDto commentDto) {
+        getEventById(userId, eventId);
+
+        Comment comment = getCommentById(comId);
+        comment.setContent(commentDto.getContent());
+        comment.setModified(LocalDateTime.now());
+        comment.setIsEdited(true);
+
+        return commentMapper.toDto(commentRepository.save(comment));
+    }
+
+    public void deleteComment(Long userId, Long eventId, Long comId) {
+        getEventById(userId, eventId);
+        getCommentById(comId);
+        commentRepository.deleteById(comId);
+    }
+
+    public Comment getCommentById(Long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Комментарий не найден"));
     }
 }

@@ -23,10 +23,7 @@ import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.*;
-import ru.practicum.repository.CategoryRepository;
-import ru.practicum.repository.CompilationRepository;
-import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.UserRepository;
+import ru.practicum.repository.*;
 import ru.practicum.util.LocalDateTimeFormatter;
 import ru.practicum.util.State;
 
@@ -54,6 +51,8 @@ public class AdminService {
     CompilationMapper compilationMapper;
 
     LocationService locationService;
+
+    CommentRepository commentRepository;
 
     public UserDto createUser(UserDto userDto) {
         User savedUser = userRepository.save(userMapper.toEntity(userDto));
@@ -203,5 +202,10 @@ public class AdminService {
                 .ifPresent(events -> compilation.setEvents(eventRepository.findAllById(events)));
         compilationRepository.save(compilation);
         return compilationMapper.toDto(compilation);
+    }
+
+    public void deleteComment(Long comId) {
+        commentRepository.findById(comId).orElseThrow(() -> new NotFoundException("Комментарий не найден"));
+        commentRepository.deleteById(comId);
     }
 }

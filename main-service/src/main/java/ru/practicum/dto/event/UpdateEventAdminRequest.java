@@ -20,7 +20,6 @@ public class UpdateEventAdminRequest {
     String description;
     Location location;
     Long category;
-    //todo jsonformat
     String eventDate;
     Boolean paid;
     Integer participantLimit;

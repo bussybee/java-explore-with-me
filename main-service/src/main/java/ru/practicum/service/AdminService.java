@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.category.NewCategoryDto;
 import ru.practicum.dto.compilation.CompilationDto;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import static ru.practicum.util.LocalDateTimeFormatter.parse;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
@@ -61,6 +63,7 @@ public class AdminService {
         return userMapper.toDto(savedUser);
     }
 
+    @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Integer> ids, int from, int size) {
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         List<User> users;
@@ -79,6 +82,7 @@ public class AdminService {
         userRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
@@ -132,6 +136,7 @@ public class AdminService {
         return eventMapper.toDto(event);
     }
 
+    @Transactional(readOnly = true)
     public List<FullEventDto> getEvents(List<Long> users, List<String> states, List<Long> categories,
                                         String rangeStart, String rangeEnd, int from, int size) {
         QEvent event = QEvent.event;

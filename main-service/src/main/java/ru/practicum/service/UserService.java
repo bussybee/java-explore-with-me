@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.comment.NewCommentDto;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import static ru.practicum.util.LocalDateTimeFormatter.parse;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
@@ -128,15 +130,18 @@ public class UserService {
         return eventMapper.toDto(event);
     }
 
+    @Transactional(readOnly = true)
     public FullEventDto getEvent(Long userId, Long eventId) {
         return eventMapper.toDto(getEventById(userId, eventId));
     }
 
+    @Transactional(readOnly = true)
     public Event getEventById(Long userId, Long eventId) {
         adminService.getUserById(userId);
         return eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено"));
     }
 
+    @Transactional(readOnly = true)
     public List<FullEventDto> getEvents(Long userId, int from, int size) {
         return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from > 0 ? from / size : 0, size)).stream()
                 .map(eventMapper::toDto).toList();
@@ -181,6 +186,7 @@ public class UserService {
         return requestMapper.toDto(requestRepository.save(request));
     }
 
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequests(Long userId) {
         adminService.getUserById(userId);
         return requestRepository.findAllByRequesterId(userId).stream().map(requestMapper::toDto).toList();
@@ -239,6 +245,7 @@ public class UserService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequestsByEvent(Long userId, Long eventId) {
         return requestRepository.findAllByEvent(userId, eventId).stream().map(requestMapper::toDto).toList();
     }
@@ -278,6 +285,7 @@ public class UserService {
         commentRepository.deleteById(comId);
     }
 
+    @Transactional(readOnly = true)
     public Comment getCommentById(Long id) {
         return commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Комментарий не найден"));
     }

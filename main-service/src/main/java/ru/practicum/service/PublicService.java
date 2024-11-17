@@ -8,17 +8,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.event.FullEventDto;
 import ru.practicum.exception.IncorrectDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
+import ru.practicum.mapper.CommentMapper;
 import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
 import ru.practicum.model.QEvent;
 import ru.practicum.repository.CategoryRepository;
+import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.CompilationRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.util.LocalDateTimeFormatter;
@@ -29,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class PublicService {
@@ -42,6 +46,9 @@ public class PublicService {
     EventMapper eventMapper;
 
     StatsManager statsManager;
+
+    CommentRepository commentRepository;
+    CommentMapper commentMapper;
 
     public CategoryDto getCategoryById(Long id) {
         return categoryMapper.toDto(categoryRepository.findById(id)
@@ -72,7 +79,10 @@ public class PublicService {
         statsManager.sendEventHit(uri, ip);
         event.setViews(statsManager.getEventHits(event));
 
-        return eventMapper.toDto(event);
+        FullEventDto eventDto = eventMapper.toDto(event);
+        eventDto.setComments(commentRepository.findAllByEventId(id).stream().map(commentMapper::toShortDto).toList());
+
+        return eventDto;
     }
 
     public List<FullEventDto> getEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
@@ -124,6 +134,10 @@ public class PublicService {
         events.forEach(e -> e.setViews(statsManager.getEventHits(e)));
         statsManager.sendEventHit(uri, ip);
 
-        return events.stream().map(eventMapper::toDto).toList();
+        return events.stream()
+                .map(eventMapper::toDto)
+                .peek(e -> e.setComments(commentRepository.findAllByEventId(e.getId()).stream()
+                        .map(commentMapper::toShortDto).toList()))
+                .toList();
     }
 }

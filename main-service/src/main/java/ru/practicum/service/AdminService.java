@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.category.NewCategoryDto;
 import ru.practicum.dto.compilation.CompilationDto;
@@ -23,10 +24,7 @@ import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.*;
-import ru.practicum.repository.CategoryRepository;
-import ru.practicum.repository.CompilationRepository;
-import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.UserRepository;
+import ru.practicum.repository.*;
 import ru.practicum.util.LocalDateTimeFormatter;
 import ru.practicum.util.State;
 
@@ -37,6 +35,7 @@ import java.util.Optional;
 import static ru.practicum.util.LocalDateTimeFormatter.parse;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
@@ -55,6 +54,8 @@ public class AdminService {
 
     LocationService locationService;
 
+    CommentRepository commentRepository;
+
     public UserDto createUser(UserDto userDto) {
         User savedUser = userRepository.save(userMapper.toEntity(userDto));
         log.info("User created: {}", savedUser);
@@ -62,6 +63,7 @@ public class AdminService {
         return userMapper.toDto(savedUser);
     }
 
+    @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Integer> ids, int from, int size) {
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         List<User> users;
@@ -80,6 +82,7 @@ public class AdminService {
         userRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
@@ -133,6 +136,7 @@ public class AdminService {
         return eventMapper.toDto(event);
     }
 
+    @Transactional(readOnly = true)
     public List<FullEventDto> getEvents(List<Long> users, List<String> states, List<Long> categories,
                                         String rangeStart, String rangeEnd, int from, int size) {
         QEvent event = QEvent.event;
@@ -203,5 +207,10 @@ public class AdminService {
                 .ifPresent(events -> compilation.setEvents(eventRepository.findAllById(events)));
         compilationRepository.save(compilation);
         return compilationMapper.toDto(compilation);
+    }
+
+    public void deleteComment(Long comId) {
+        commentRepository.findById(comId).orElseThrow(() -> new NotFoundException("Комментарий не найден"));
+        commentRepository.deleteById(comId);
     }
 }

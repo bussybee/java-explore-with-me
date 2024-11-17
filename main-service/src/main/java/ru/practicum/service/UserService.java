@@ -6,7 +6,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.category.CategoryDto;
+import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.dto.event.FullEventDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
@@ -16,12 +19,15 @@ import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.exception.IncorrectDataException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
+import ru.practicum.mapper.CommentMapper;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.RequestMapper;
+import ru.practicum.model.Comment;
 import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 import ru.practicum.repository.CategoryRepository;
+import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
 import ru.practicum.util.RequestStatus;
@@ -35,6 +41,7 @@ import java.util.Optional;
 import static ru.practicum.util.LocalDateTimeFormatter.parse;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
@@ -52,6 +59,9 @@ public class UserService {
     RequestMapper requestMapper;
 
     LocationService locationService;
+
+    CommentMapper commentMapper;
+    CommentRepository commentRepository;
 
     public FullEventDto createEvent(Long userId, NewEventDto eventDto) {
         User initiator = adminService.getUserById(userId);
@@ -120,15 +130,18 @@ public class UserService {
         return eventMapper.toDto(event);
     }
 
+    @Transactional(readOnly = true)
     public FullEventDto getEvent(Long userId, Long eventId) {
         return eventMapper.toDto(getEventById(userId, eventId));
     }
 
+    @Transactional(readOnly = true)
     public Event getEventById(Long userId, Long eventId) {
         adminService.getUserById(userId);
         return eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено"));
     }
 
+    @Transactional(readOnly = true)
     public List<FullEventDto> getEvents(Long userId, int from, int size) {
         return eventRepository.findAllByInitiatorId(userId, PageRequest.of(from > 0 ? from / size : 0, size)).stream()
                 .map(eventMapper::toDto).toList();
@@ -173,6 +186,7 @@ public class UserService {
         return requestMapper.toDto(requestRepository.save(request));
     }
 
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequests(Long userId) {
         adminService.getUserById(userId);
         return requestRepository.findAllByRequesterId(userId).stream().map(requestMapper::toDto).toList();
@@ -231,7 +245,48 @@ public class UserService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequestsByEvent(Long userId, Long eventId) {
         return requestRepository.findAllByEvent(userId, eventId).stream().map(requestMapper::toDto).toList();
+    }
+
+    public CommentDto createComment(Long userId, Long eventId, NewCommentDto commentDto) {
+        User author = adminService.getUserById(userId);
+        eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено"));
+
+        Comment comment = Comment.builder()
+                .content(commentDto.getContent())
+                .author(author)
+                .eventId(eventId)
+                .created(LocalDateTime.now())
+                .isEdited(false)
+                .build();
+
+        Comment savedComment = commentRepository.save(comment);
+        log.info("Comment created {}", comment);
+
+        return commentMapper.toDto(savedComment);
+    }
+
+    public CommentDto updateComment(Long userId, Long eventId, Long comId, NewCommentDto commentDto) {
+        getEventById(userId, eventId);
+
+        Comment comment = getCommentById(comId);
+        comment.setContent(commentDto.getContent());
+        comment.setModified(LocalDateTime.now());
+        comment.setIsEdited(true);
+
+        return commentMapper.toDto(commentRepository.save(comment));
+    }
+
+    public void deleteComment(Long userId, Long eventId, Long comId) {
+        getEventById(userId, eventId);
+        getCommentById(comId);
+        commentRepository.deleteById(comId);
+    }
+
+    @Transactional(readOnly = true)
+    public Comment getCommentById(Long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Комментарий не найден"));
     }
 }

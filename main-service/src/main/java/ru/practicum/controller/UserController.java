@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.comment.CommentDto;
+import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.dto.event.FullEventDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
@@ -76,5 +78,25 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public ParticipationRequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long requestId) {
         return userService.cancelRequest(userId, requestId);
+    }
+
+    @PostMapping("{userId}/events/{eventId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto createComment(@PathVariable Long userId, @PathVariable Long eventId,
+                                    @RequestBody @Valid NewCommentDto commentDto) {
+        return userService.createComment(userId, eventId, commentDto);
+    }
+
+    @PatchMapping("{userId}/events/{eventId}/comments/{comId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CommentDto updateComment(@PathVariable Long userId, @PathVariable Long eventId, @PathVariable Long comId,
+                                    @RequestBody @Valid NewCommentDto commentDto) {
+        return userService.updateComment(userId, eventId, comId, commentDto);
+    }
+
+    @DeleteMapping("{userId}/events/{eventId}/comments/{comId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable Long userId, @PathVariable Long eventId, @PathVariable Long comId) {
+        userService.deleteComment(userId, eventId, comId);
     }
 }

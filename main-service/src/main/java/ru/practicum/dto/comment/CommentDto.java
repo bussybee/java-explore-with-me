@@ -1,12 +1,15 @@
 package ru.practicum.dto.comment;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.dto.user.UserShortDto;
 
 import java.time.LocalDateTime;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentDto {
     Long id;
     String content;

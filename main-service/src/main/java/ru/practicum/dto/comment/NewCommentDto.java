@@ -8,5 +8,5 @@ import lombok.Data;
 public class NewCommentDto {
     @Size(min = 1, max = 500)
     @NotBlank
-    String content;
+    private String content;
 }
